@@ -86,8 +86,6 @@ local hs = require('hyperscan')
 
 init
 ----
-
-`syntax:`
 ```lua
 local ok, err = hs.init(mode, serialized_db_path)
 ```
@@ -110,14 +108,11 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 hs_block_compile
 ----------------
-
-`syntax:`
 ```lua
 local ret, err = hs.hs_block_compile(patterns)
 ```
 
 Compile patterns to a datebase for block mode scanning.
-
 
 * Parameter `patterns`
     regex table.
@@ -132,8 +127,6 @@ Compile patterns to a datebase for block mode scanning.
 
 hs_block_scan
 -------------
-
-`syntax:`
 ```lua
 local ret, id, from, to = hs.hs_block_scan(string)
 ```
@@ -158,16 +151,15 @@ Author
 ======
 
 Lubin <lgbxyz@gmail.com>.
-[Back to TOC](#table-of-contents)
 
 Copyright and License
 =====================
 
 This module is licensed under the MIT license.
-[Back to TOC](#table-of-contents)
 
 See Also
 ========
 
-* Hyperscan Developer’s Reference Guide: http://intel.github.io/hyperscan/dev-reference/
+* Hyperscan Developer’s Reference Guide: http://intel.github.io/hyperscan/dev-reference/]
+
 [Back to TOC](#table-of-contents)
