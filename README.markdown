@@ -160,6 +160,6 @@ This module is licensed under the MIT license.
 See Also
 ========
 
-* Hyperscan Developer’s Reference Guide: http://intel.github.io/hyperscan/dev-reference/]
+* Hyperscan Developer’s Reference Guide: http://intel.github.io/hyperscan/dev-reference/
 
 [Back to TOC](#table-of-contents)

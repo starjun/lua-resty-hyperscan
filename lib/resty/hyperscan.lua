@@ -12,6 +12,7 @@ local _M = {
     _VERSION = '0.1.0',
     _HS_VER  = '5.3.0', -- Hyperscan v5.3.0
     -- compiler pattern flags
+    -- see http://intel.github.io/hyperscan/dev-reference/api_constants.html#pattern-flags
     HS_FLAG_CASELESS     = 1,
     HS_FLAG_DOTALL       = 2,
     HS_FLAG_MULTILINE    = 4,
@@ -25,7 +26,8 @@ local _M = {
     HS_FLAG_QUIET        = 1024,
     -- work mode
     HS_WORK_MODE_NORMAL       = 1, -- both Compilation and Scanning, use libhs.so
-    HS_WORK_MODE_ONLY_RUNTIME = 2, -- only Scanning, use libhs_runtime.so, http://intel.github.io/hyperscan/dev-reference/serialization.html
+    HS_WORK_MODE_ONLY_RUNTIME = 2, --[[only Scanning, use libhs_runtime.so,
+       see http://intel.github.io/hyperscan/dev-reference/serialization.html --]]
 }
 
 --local mt = { __index = _M }
@@ -152,6 +154,22 @@ local function _find_shared_obj(so_name)
     end
 end
 
+local function _load_serialize_database(path)
+    if not path or type(path) ~= "string" then
+        return false, "Please specify serialization datebase path !"
+    end
+    local file = io.open(path, "rb")
+    if not file then
+        return false, "Please specify serialization datebase path !"
+    end
+    local db_data = file:read("a")
+    local db_size = file:seek()
+    local ret = hyperscan.hs_deserialize_database(db_data, db_size, hs_datebase)
+    if ret ~= hyperscan.HS_SUCCESS then
+        return false, "deserialize datebase failed, " .. ret
+    end
+end
+
 function _M.init(mode, serialized_db_path)
     mode = mode or _M.HS_WORK_MODE_NORMAL
     -- check OS --TODO
@@ -176,18 +194,9 @@ function _M.init(mode, serialized_db_path)
 
     -- load db from file in runtime mode
     if mode == _M.HS_WORK_MODE_ONLY_RUNTIME then
-        if not serialized_db_path then
-            return false, "Please specify serialization datebase path !"
-        end
-        local file = io.open(serialized_db_path, "rb")
-        if not file then
-            return false, "Please specify serialization datebase path !"
-        end
-        local db_data = file:read("a")
-        local db_size = file:seek()
-        ret = hyperscan.hs_deserialize_database(db_data, db_size, hs_datebase)
-        if ret ~= hyperscan.HS_SUCCESS then
-            return false, "deserialize datebase failed, " .. ret
+        local lret, err = _load_serialize_database(serialized_db_path)
+        if not lret then
+            return false, err
         end
     end
 
@@ -204,6 +213,9 @@ local function _hs_compile_internal(patterns, mode)
     end
 
     -- Parameter Check
+    if type(patterns) ~= "table" then
+        return false, "#1 paramter should be a table !"
+    end
     local count = nkeys(patterns)
     if count < 1 then
         return false, "No Patterns !"
@@ -272,7 +284,7 @@ local function hs_match_event_handler(id, from, to, flag, context)
     hs_result.id   = tonumber(id)
     hs_result.from = tonumber(from)
     hs_result.to   = tonumber(to)
-    return 1
+    return 1 -- only match once
 end
 
 function _M.hs_block_scan(string)
