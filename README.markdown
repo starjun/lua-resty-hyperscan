@@ -6,17 +6,19 @@ lua-resty-hyperscan - [Hyperscan](https://github.com/intel/hyperscan) for [Openr
 Table of Contents
 =================
 
-* [Name](#name)
-* [Status](#status)
-* [Description](#description)
-* [Synopsis](#synopsis)
-* [Methods](#methods)
-  * [init](#init)
-  * [hs_block_compile](#hs_block_compile)
-  * [hs_block_scan](#hs_block_scan)
-* [Author](#author)
-* [Copyright and License](#copyright-and-license)
-* [See Also](#see-also)
+- [Name](#name)
+- [Table of Contents](#table-of-contents)
+- [Status](#status)
+- [Description](#description)
+- [Synopsis](#synopsis)
+- [Methods](#methods)
+  - [load library](#load-library)
+  - [init](#init)
+  - [hs_block_compile](#hs_block_compile)
+  - [hs_block_scan](#hs_block_scan)
+- [Author](#author)
+- [Copyright and License](#copyright-and-license)
+- [See Also](#see-also)
 
 Status
 ======
@@ -76,15 +78,14 @@ location / {
 Methods
 =======
 
-[Back to TOC](#table-of-contents)
-
-
+load library
+-------
 ```lua
 local hs = require('hyperscan')
 ```
 
 init
----
+----
 
 `syntax:`
 ```lua
@@ -108,7 +109,7 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 [Back to TOC](#table-of-contents)
 
 hs_block_compile
--------
+----------------
 
 `syntax:`
 ```lua
@@ -130,7 +131,7 @@ Compile patterns to a datebase for block mode scanning.
 [Back to TOC](#table-of-contents)
 
 hs_block_scan
-----------
+-------------
 
 `syntax:`
 ```lua
@@ -157,23 +158,16 @@ Author
 ======
 
 Lubin <lgbxyz@gmail.com>.
-
 [Back to TOC](#table-of-contents)
 
 Copyright and License
 =====================
 
 This module is licensed under the MIT license.
-
 [Back to TOC](#table-of-contents)
 
 See Also
 ========
 
-* the ngx_lua module: https://github.com/openresty/lua-nginx-module
-* the MySQL wired protocol specification: http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol
-* the [lua-resty-memcached](https://github.com/agentzh/lua-resty-memcached) library
-* the [lua-resty-redis](https://github.com/agentzh/lua-resty-redis) library
-* the ngx_drizzle module: https://github.com/openresty/drizzle-nginx-module
-
+* Hyperscan Developer’s Reference Guide: http://intel.github.io/hyperscan/dev-reference/
 [Back to TOC](#table-of-contents)
