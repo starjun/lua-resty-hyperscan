@@ -107,19 +107,19 @@ int hs_compile_ext_multi(
     const unsigned int *flags,
     const unsigned int *ids,
     const hs_expr_ext_t *const *ext,
-    unsigned int elements, 
+    unsigned int elements,
     unsigned int mode,
     const hs_platform_info_t *platform,
-    hs_database_t **db, 
+    hs_database_t **db,
     hs_compile_error_t **error);
 
 /* Block Scan */
 int hs_scan(
-    const hs_database_t *db, 
+    const hs_database_t *db,
     const char *data,
-    unsigned int length, 
+    unsigned int length,
     unsigned int flags,
-    hs_scratch_t *scratch, 
+    hs_scratch_t *scratch,
     match_event_handler onEvent,
     void *context);
 
@@ -152,7 +152,7 @@ local function _find_shared_obj(so_name)
     end
 end
 
-function _M.init(mode, serialization_db_path)
+function _M.init(mode, serialized_db_path)
     mode = mode or _M.HS_WORK_MODE_NORMAL
     -- check OS --TODO
     -- check hyperscan shared library
@@ -176,17 +176,19 @@ function _M.init(mode, serialization_db_path)
 
     -- load db from file in runtime mode
     if mode == _M.HS_WORK_MODE_ONLY_RUNTIME then
-        if not serialization_db_path then
+        if not serialized_db_path then
             return false, "Please specify serialization datebase path !"
         end
-        local file = io.open(serialization_db_path, "rb")
+        local file = io.open(serialized_db_path, "rb")
         if not file then
             return false, "Please specify serialization datebase path !"
         end
         local db_data = file:read("a")
         local db_size = file:seek()
         ret = hyperscan.hs_deserialize_database(db_data, db_size, hs_datebase)
-
+        if ret ~= hyperscan.HS_SUCCESS then
+            return false, "deserialize datebase failed, " .. ret
+        end
     end
 
     return true, "load " .. so_path .. " success !"

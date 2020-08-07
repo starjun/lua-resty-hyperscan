@@ -78,101 +78,78 @@ Methods
 
 [Back to TOC](#table-of-contents)
 
+
+```lua
+local hs = require('hyperscan')
+```
+
 init
 ---
 
-`syntax: db, err = mysql:new()`
+`syntax:`
+```lua
+local ok, err = hs.init(mode, serialized_db_path)
+```
 
-Creates a MySQL connection object. In case of failures, returns `nil` and a string describing the error.
+Load Hyperscan shared library and check the CPU Instruction Set.
+* Parameter `mode`
+    - hs.`HS_WORK_MODE_NORMAL`
+    - hs.`HS_WORK_MODE_RUNTIME`
+
+* Parameter `serialized_db_path`
+    serialized datebase path.
+
+* Return Value `ok`
+    boolean value.
+
+* Return Value `err`
+    string value to indicate error.
 
 [Back to TOC](#table-of-contents)
 
 hs_block_compile
 -------
 
-`syntax: ok, err, errcode, sqlstate = db:connect(options)`
+`syntax:`
+```lua
+local ret, err = hs.hs_block_compile(patterns)
+```
 
-Attempts to connect to the remote MySQL server.
+Compile patterns to a datebase for block mode scanning.
 
-The `options` argument is a Lua table holding the following keys:
 
-* `host`
+* Parameter `patterns`
+    regex table.
+
+* Return Value `ok`
+    boolean value.
+
+* Return Value `err`
+    string value to indicate error.
   
-    the host name for the MySQL server.
-
-* `port`
-  
-    the port that the MySQL server is listening on. Default to 3306.
-
-* `path`
-  
-    the path of the unix socket file listened by the MySQL server.
-
-* `database`
-  
-    the MySQL database name.
-
-* `user`
-  
-    MySQL account name for login.
-
-* `password`
-  
-    MySQL account password for login (in clear text).
-
-* `charset`
-  
-    the character set used on the MySQL connection, which can be different from the default charset setting.
-  The following values are accepted: `big5`, `dec8`, `cp850`, `hp8`, `koi8r`, `latin1`, `latin2`,
-  `swe7`, `ascii`, `ujis`, `sjis`, `hebrew`, `tis620`, `euckr`, `koi8u`, `gb2312`, `greek`,
-  `cp1250`, `gbk`, `latin5`, `armscii8`, `utf8`, `ucs2`, `cp866`, `keybcs2`, `macce`,
-  `macroman`, `cp852`, `latin7`, `utf8mb4`, `cp1251`, `utf16`, `utf16le`, `cp1256`,
-  `cp1257`, `utf32`, `binary`, `geostd8`, `cp932`, `eucjpms`, `gb18030`.
-
-* `max_packet_size`
-  
-    the upper limit for the reply packets sent from the MySQL server (default to 1MB).
-
-* `ssl`
-  
-    If set to `true`, then uses SSL to connect to MySQL (default to `false`). If the MySQL
-    server does not have SSL support
-    (or just disabled), the error string "ssl disabled on server" will be returned.
-
-* `ssl_verify`
-  
-    If set to `true`, then verifies the validity of the server SSL certificate (default to `false`).
-    Note that you need to configure the [lua_ssl_trusted_certificate](https://github.com/openresty/lua-nginx-module#lua_ssl_trusted_certificate)
-    to specify the CA (or server) certificate used by your MySQL server. You may also
-    need to configure [lua_ssl_verify_depth](https://github.com/openresty/lua-nginx-module#lua_ssl_verify_depth)
-    accordingly.
-
-* `pool`
-  
-    the name for the MySQL connection pool. if omitted, an ambiguous pool name will be generated automatically with the string template `user:database:host:port` or `user:database:path`. (this option was first introduced in `v0.08`.)
-
-* `pool_size`
-  
-    Specifies the size of the connection pool. If omitted and no `backlog` option was provided, no pool will be created. If omitted but `backlog` was provided, the pool will be created with a default size equal to the value of the [lua_socket_pool_size](https://github.com/openresty/lua-nginx-module#lua_socket_pool_size) directive. The connection pool holds up to `pool_size` alive connections ready to be reused by subsequent calls to [connect](#connect), but note that there is no upper limit to the total number of opened connections outside of the pool. If you need to restrict the total number of opened connections, specify the `backlog` option. When the connection pool would exceed its size limit, the least recently used (kept-alive) connection already in the pool will be closed to make room for the current connection. Note that the cosocket connection pool is per Nginx worker process rather than per Nginx server instance, so the size limit specified here also applies to every single Nginx worker process. Also note that the size of the connection pool cannot be changed once it has been created. Note that at least [ngx_lua 0.10.14](https://github.com/openresty/lua-nginx-module/tags) is required to use this options.
-
-* `backlog`
-  
-    If specified, this module will limit the total number of opened connections for this pool. No more connections than `pool_size` can be opened for this pool at any time. If the connection pool is full, subsequent connect operations will be queued into a queue equal to this option's value (the "backlog" queue). If the number of queued connect operations is equal to `backlog`, subsequent connect operations will fail and return nil plus the error string `"too many waiting connect operations"`. The queued connect operations will be resumed once the number of connections in the pool is less than `pool_size`. The queued connect operation will abort once they have been queued for more than `connect_timeout`, controlled by [set_timeout](#set_timeout), and will return nil plus the error string "timeout". Note that at least [ngx_lua 0.10.14](https://github.com/openresty/lua-nginx-module/tags) is required to use this options.
-
-* `compact_arrays`
-  
-    when this option is set to true, then the [query](#query) and [read_result](#read_result) methods will return the array-of-arrays structure for the resultset, rather than the default array-of-hashes structure.
-
-Before actually resolving the host name and connecting to the remote backend, this method will always look up the connection pool for matched idle connections created by previous calls of this method.
-
 [Back to TOC](#table-of-contents)
 
 hs_block_scan
 ----------
 
-`syntax: hs.hs_block_scan(string)`
+`syntax:`
+```lua
+local ret, id, from, to = hs.hs_block_scan(string)
+```
 
-Sets the timeout (in ms) protection for subsequent operations, including the `connect` method.
+scan the input data.
+
+* Parameter `string`
+    a string.
+
+* Return Value `ret`
+    boolean value.
+
+* Return Value `id`
+    matched id.
+
+* Return Value `from` and `to`
+    matched postion.
 
 [Back to TOC](#table-of-contents)
 
