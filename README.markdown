@@ -32,6 +32,20 @@ Description
 
 **THIS LIBRARY IS NOT THREAD-SAFE !**
 
+**THIS LIBRARY IS ONLY TESTED on CentOS 7 !**
+
+# Dependency
+
+You should build the hyperscan shared library. I got some pre-build blow:
+
+- [CentOS 7](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/el7_x64)
+
+- [CentOS 8](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/el8_x64)
+
+- [MacOS](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/osx)
+
+- [Windows 10](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/win10_x64)
+
 Synopsis
 ========
 
@@ -80,20 +94,24 @@ Methods
 
 load library
 -------
+
 ```lua
 local hs = require('hyperscan')
 ```
 
 init
 ----
+
 ```lua
 local ok, err = hs.init(mode, serialized_db_path)
 ```
 
 Load Hyperscan shared library and check the CPU Instruction Set.
+
 * Parameter `mode`
-    - hs.`HS_WORK_MODE_NORMAL`
-    - hs.`HS_WORK_MODE_RUNTIME`
+  
+  - hs.`HS_WORK_MODE_NORMAL`
+  - hs.`HS_WORK_MODE_RUNTIME`
 
 * Parameter `serialized_db_path`
     serialized datebase path.
@@ -108,6 +126,7 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 hs_block_compile
 ----------------
+
 ```lua
 local ret, err = hs.hs_block_compile(patterns)
 ```
@@ -122,11 +141,12 @@ Compile patterns to a datebase for block mode scanning.
 
 * Return Value `err`
     string value to indicate error.
-  
+
 [Back to TOC](#table-of-contents)
 
 hs_block_scan
 -------------
+
 ```lua
 local ret, id, from, to = hs.hs_block_scan(string)
 ```
