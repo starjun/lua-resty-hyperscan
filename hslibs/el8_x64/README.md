@@ -3,7 +3,7 @@
 Just run the script blow.
 
 ```bash
-#!/bin/bash
+#!/usr/bin/bash
 
 HS_VER=5.3.0
 
@@ -27,5 +27,5 @@ cmake -DCMAKE_BUILD_TYPE=MinSizeRel   \
 make -j8 
 
 # show result
-ls -lh  hs_build/build/lib
+ls -lh  lib
 ```

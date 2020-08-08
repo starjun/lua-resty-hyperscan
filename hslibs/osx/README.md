@@ -34,5 +34,5 @@ cmake -DCMAKE_BUILD_TYPE=MinSizeRel   \
 make -j8 
 
 # show result
-ls -lh  hs_build/build/lib
+ls -lh lib
 ```
