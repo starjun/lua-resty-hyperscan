@@ -137,8 +137,26 @@ int hs_serialized_database_size(const char *bytes, const size_t length, size_t *
 local hyperscan    = nil
 local hs_datebase  = ffi_new('hs_database_t*[1]')
 local hs_scratch   = ffi_new('hs_scratch_t*[1]')
-local hs_result    = {id=0, from=0, to=0}
+
 local hs_init_mode = _M.HS_WORK_MODE_NORMAL
+
+-- store result in Callback
+local hs_result_id    = 0
+local hs_result_from  = 0
+local hs_result_to    = 0
+
+local function _get_so_name(base_name, version)
+    if ffi.os == "OSX" then --libhs.5.3.0.dylib
+        return "lib" .. base_name .. "." .. version .. ".dylib"
+    end
+
+    if ffi.os == "Windows" then -- this is just a guess
+        return base_name .. "." .. version .. "dll"
+    end
+
+    -- libhs.so.5.3.0
+    return "lib" .. base_name .. ".so." .. version
+end
 
 local function _find_shared_obj(so_name)
     for k,_ in string_gmatch(package.cpath, "[^;]+") do
@@ -172,11 +190,10 @@ end
 
 function _M.init(mode, serialized_db_path)
     mode = mode or _M.HS_WORK_MODE_NORMAL
-    -- check OS --TODO
     -- check hyperscan shared library
-    local so_name = 'libhs.so.' .. _M._HS_VER
+    local so_name = _get_so_name('hs', _M._HS_VER)
     if mode == _M.HS_WORK_MODE_ONLY_RUNTIME then
-        so_name = 'libhs_runtime.so.' .. _M._HS_VER
+        so_name = _get_so_name('hs_runtime', _M._HS_VER)
     end
     local so_path = _find_shared_obj(so_name)
     if so_path ~= nil then
@@ -280,10 +297,10 @@ end
 --]]
 
 -- CallBack
-local function hs_match_event_handler(id, from, to, flag, context)
-    hs_result.id   = tonumber(id)
-    hs_result.from = tonumber(from)
-    hs_result.to   = tonumber(to)
+local function hs_match_event_handler(id, from, to, _, _)
+    hs_result_id   = tonumber(id)
+    hs_result_from = tonumber(from)
+    hs_result_to   = tonumber(to)
     return 1 -- only match once
 end
 
@@ -299,7 +316,7 @@ function _M.hs_block_scan(string)
     )
 
     if ret == hyperscan.HS_SCAN_TERMINATED then
-        return true, hs_result.id, hs_result.from, hs_result.to
+        return true, hs_result_id, hs_result_from, hs_result_to
     end
 
     return false
