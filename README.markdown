@@ -92,8 +92,7 @@ location / {
 Methods
 =======
 
-load library
--------
+way to load this library
 
 ```lua
 local hs = require('hyperscan')
@@ -103,24 +102,33 @@ init
 ----
 
 ```lua
-local ok, err = hs.init(mode, serialized_db_path)
+local ok, err = hs.init(mode, [serialized_db_path])
 ```
 
 Load Hyperscan shared library and check the CPU Instruction Set.
 
-* Parameter `mode`
-  
-  - hs.`HS_WORK_MODE_NORMAL`
-  - hs.`HS_WORK_MODE_RUNTIME`
+### Parameters
 
-* Parameter `serialized_db_path`
-    serialized datebase path.
+#### `mode`
 
-* Return Value `ok`
-    boolean value.
+- hs.`HS_WORK_MODE_NORMAL`
+- hs.`HS_WORK_MODE_RUNTIME`
 
-* Return Value `err`
-    string value to indicate error.
+#### `serialized_db_path`
+
+if parameter `mode`  is hs.`HS_WORK_MODE_RUNTIME`, then this parameter is necessary.
+
+### Return Value
+
+#### `ok`
+
+boolean value. true for success, false for failure and check ther `err`.
+
+#### `err`
+
+string value to indicate error. 
+
+
 
 [Back to TOC](#table-of-contents)
 
@@ -133,14 +141,23 @@ local ret, err = hs.hs_block_compile(patterns)
 
 Compile patterns to a datebase for block mode scanning.
 
-* Parameter `patterns`
-    regex table.
+### Parameters
 
-* Return Value `ok`
-    boolean value.
+#### `patterns`
 
-* Return Value `err`
-    string value to indicate error.
+regex table.
+
+### Return Value
+
+#### `ok`
+
+boolean value. true for success, false for failure and check ther `err`.
+
+#### `err`
+
+string value to indicate error.
+
+
 
 [Back to TOC](#table-of-contents)
 
@@ -151,19 +168,27 @@ hs_block_scan
 local ret, id, from, to = hs.hs_block_scan(string)
 ```
 
-scan the input data.
+scan the input data and return the match result
 
-* Parameter `string`
-    a string.
+### Parameters
 
-* Return Value `ret`
-    boolean value.
+#### `string`
 
-* Return Value `id`
-    matched id.
+a string.
 
-* Return Value `from` and `to`
-    matched postion.
+### Return Value
+
+#### `ret`
+
+boolean value.
+
+#### `id`
+
+matched id.
+
+#### `from` , `to`
+
+matched postion.
 
 [Back to TOC](#table-of-contents)
 

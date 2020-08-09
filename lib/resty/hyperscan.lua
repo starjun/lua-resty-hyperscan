@@ -1,4 +1,4 @@
-
+-- Copyright (C) Lubin
 
 local ffi = require('ffi')
 local ffi_new = ffi.new
@@ -67,10 +67,7 @@ typedef struct hs_scratch {
 } hs_scratch_t;
 
 typedef struct hs_platform_info {
-    unsigned int tune;
-    unsigned long long cpu_features;
-    unsigned long long reserved1;
-    unsigned long long reserved2;
+    char* dummy;
 } hs_platform_info_t;
 
 typedef struct hs_compile_error {
@@ -145,19 +142,25 @@ local hs_result_id    = 0
 local hs_result_from  = 0
 local hs_result_to    = 0
 
+--[[ get shared libray name based on platform
+    - OSX       : libhs.5.3.0.dylib
+    - Windows   : not sure
+    -Unix Like : libhs.so.5.3.0
+--]]
 local function _get_so_name(base_name, version)
     if ffi.os == "OSX" then --libhs.5.3.0.dylib
         return "lib" .. base_name .. "." .. version .. ".dylib"
     end
 
     if ffi.os == "Windows" then -- this is just a guess
-        return base_name .. "." .. version .. "dll"
+        return base_name .. "." .. version .. ".dll"
     end
 
     -- libhs.so.5.3.0
     return "lib" .. base_name .. ".so." .. version
 end
 
+-- find the shared library in cpath
 local function _find_shared_obj(so_name)
     for k,_ in string_gmatch(package.cpath, "[^;]+") do
         local so_path = string_match(k, "(.*/)")
@@ -172,6 +175,7 @@ local function _find_shared_obj(so_name)
     end
 end
 
+-- load the serialized datebase for HS_WORK_MODE_RUNTIME
 local function _load_serialize_database(path)
     if not path or type(path) ~= "string" then
         return false, "Please specify serialization datebase path !"
@@ -188,6 +192,10 @@ local function _load_serialize_database(path)
     end
 end
 
+--[[ init
+    - ffi.load the shared library
+    - check CPU Instruction Set
+--]]
 function _M.init(mode, serialized_db_path)
     mode = mode or _M.HS_WORK_MODE_NORMAL
     -- check hyperscan shared library
@@ -250,7 +258,7 @@ local function _hs_compile_internal(patterns, mode)
         index = index + 1
     end
 
-    local hserr = ffi_new('hs_compile_error_t*[1]')
+    local hs_err = ffi_new('hs_compile_error_t*[1]')
 
     local ret = hyperscan.hs_compile_ext_multi(
         ffi_cast('const char* const*', expressions),  -- const char *const *expressions,
@@ -261,11 +269,11 @@ local function _hs_compile_internal(patterns, mode)
         mode,            -- unsigned int mode,
         nil,             -- const hs_platform_info_t *platform,
         hs_datebase,     --hs_database_t **db,
-        hserr            --hs_compile_error_t **error
+        hs_err           --hs_compile_error_t **error
     )
     if ret ~= hyperscan.HS_SUCCESS then
-        local errlog = hserr.message
-        hyperscan.hs_free_compile_error(hserr[0])
+        local errlog = hs_err.message
+        hyperscan.hs_free_compile_error(hs_err[0])
         return false, errlog
     end
 
@@ -296,7 +304,8 @@ function _M.hs_vector_compile(patterns)
 end
 --]]
 
--- CallBack
+-- CallBack (ignore flags and context paramters)
+-- Just Match Once
 local function hs_match_event_handler(id, from, to, _, _)
     hs_result_id   = tonumber(id)
     hs_result_from = tonumber(from)
