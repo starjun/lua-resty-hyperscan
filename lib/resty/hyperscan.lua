@@ -70,6 +70,10 @@ typedef struct hs_platform_info {
     char* dummy;
 } hs_platform_info_t;
 
+typedef struct hs_stream {
+    char* dummy;
+} hs_stream_t;
+
 /* not used */
 typedef struct hs_expr_ext {
     unsigned long long flags;
