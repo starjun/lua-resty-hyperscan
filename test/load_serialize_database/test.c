@@ -26,6 +26,7 @@ int main(void)
 	hs_error_t ret;
 	hs_database_t* db;
     hs_scratch_t *scratch = NULL;
+	char* info;
 	
 	int fd;
 	void* db_ptr;
@@ -47,9 +48,23 @@ int main(void)
 		return -1;
 	}
 
+	ret = hs_serialized_database_info(db_ptr, sb.st_size, &info);
+	if (ret != HS_SUCCESS) {
+        fprintf(stderr, "ERROR: hs_serialized_database_info failed: %s\n", info);
+		munmap(db_ptr, sb.st_size);
+		close(fd);
+		hs_free_database(db);
+		return -1;
+	}
+	// OUTPUT:Version: 5.3.0 Features: AVX2 Mode: BLOCK
+	fprintf(stdout, "SUCCESS: hs_serialized_database_info: %s\n", info);
+
+	
 	ret = hs_deserialize_database(db_ptr, sb.st_size, &db);
 	if (ret != HS_SUCCESS) {
         fprintf(stderr, "ERROR: serialize database failed: %d\n", ret);
+		munmap(db_ptr, sb.st_size);
+		close(fd);
 		hs_free_database(db);
 		return -1;
 	}

@@ -75,6 +75,7 @@ init_by_lua_block {
 
 
 location / {
+    default_type text/plain;
     content_by_lua_block {
         local hs = require('hyperscan')
         local mret, id, from, to = hs.hs_block_scan('0000000ABCD000000000abcd1122')
@@ -102,7 +103,7 @@ init
 ----
 
 ```lua
-local ok, err = hs.init(mode, [serialized_db_path])
+local ok, err = hs.init(mode [,serialized_db_path])
 ```
 
 Load Hyperscan shared library and check the CPU Instruction Set.
@@ -111,8 +112,8 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 #### `mode`
 
-- hs.`HS_WORK_MODE_NORMAL`
-- hs.`HS_WORK_MODE_RUNTIME`
+- hs.`HS_WORK_MODE_NORMAL`    work well now
+- hs.`HS_WORK_MODE_RUNTIME`  do not work now, I don't know why ...
 
 #### `serialized_db_path`
 
@@ -127,8 +128,6 @@ boolean value. true for success, false for failure and check ther `err`.
 #### `err`
 
 string value to indicate error. 
-
-
 
 [Back to TOC](#table-of-contents)
 
@@ -156,8 +155,6 @@ boolean value. true for success, false for failure and check ther `err`.
 #### `err`
 
 string value to indicate error.
-
-
 
 [Back to TOC](#table-of-contents)
 
