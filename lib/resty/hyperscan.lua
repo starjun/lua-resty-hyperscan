@@ -125,7 +125,7 @@ int hs_compile_lit_multi(
     const unsigned *flags,
     const unsigned *ids,
     const size_t *lens,
-    unsigned elements, 
+    unsigned elements,
     unsigned mode,
     const hs_platform_info_t *platform,
     hs_database_t **db,
@@ -147,10 +147,10 @@ int hs_scan_vector(
     const hs_database_t *db,
     const char *const *data,
     const unsigned int *length,
-    unsigned int count, 
+    unsigned int count,
     unsigned int flags,
     hs_scratch_t *scratch,
-    match_event_handler onEvent, 
+    match_event_handler onEvent,
     void *context);
 
 /* Stream Scan */
@@ -244,6 +244,13 @@ local function _load_serialize_database(path)
     ret = hyperscan.hs_deserialize_database(db_data, db_size, hs_datebase)
     if ret ~= hyperscan.HS_SUCCESS then
         return false, "deserialize datebase failed, " .. ret
+    end
+
+    -- alloc scratch space
+    ret = hyperscan.hs_alloc_scratch(hs_datebase[0], hs_scratch)
+    if ret ~= hyperscan.HS_SUCCESS then
+        hyperscan.hs_free_database(hs_datebase[0])
+        return false, "alloc scratch failed, ret = " .. ret
     end
 
     return true
@@ -372,9 +379,6 @@ function _M.hs_vector_compile(patterns)
     return _hs_compile_internal(patterns, hyperscan.HS_MODE_VECTORED)
 end
 
-function _M.hs_stream_compile(patterns)
-    return _hs_compile_internal(patterns, hyperscan.HS_MODE_STREAM)
-end
 
 
 
@@ -440,17 +444,5 @@ function _M.hs_vector_scan(block_table)
     return false
 end
 
---[[
--- return a stream id
-function _M.hs_stream_scan_start()
-    local hs_stream   = ffi_new('hs_stream_t*[1]')
-end
-
-function _M.hs_stream_scan_work(stream_id, data)
-end
-
-function _M.hs_stream_scan_end(stream_id)
-end
---]]
 
 return _M

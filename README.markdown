@@ -112,8 +112,8 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 #### `mode`
 
-- hs.`HS_WORK_MODE_NORMAL`    work well now
-- hs.`HS_WORK_MODE_RUNTIME`  do not work now, I don't know why ...
+- hs.`HS_WORK_MODE_NORMAL`    compile and scan
+- hs.`HS_WORK_MODE_RUNTIME`  only scan
 
 #### `serialized_db_path`
 
