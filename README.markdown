@@ -112,8 +112,8 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 #### `mode`
 
-- hs.`HS_WORK_MODE_NORMAL`    compile and scan
-- hs.`HS_WORK_MODE_RUNTIME`  only scan
+- hs.`HS_WORK_MODE_NORMAL`    [Compiling Patterns](http://intel.github.io/hyperscan/dev-reference/compilation.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
+- hs.`HS_WORK_MODE_RUNTIME`  [Serialization](http://intel.github.io/hyperscan/dev-reference/serialization.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
 
 #### `serialized_db_path`
 

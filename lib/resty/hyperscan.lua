@@ -70,9 +70,6 @@ typedef struct hs_platform_info {
     char* dummy;
 } hs_platform_info_t;
 
-typedef struct hs_stream {
-    char* dummy;
-} hs_stream_t;
 
 /* not used */
 typedef struct hs_expr_ext {
@@ -119,18 +116,6 @@ int hs_compile_ext_multi(
     hs_database_t **db,
     hs_compile_error_t **error);
 
-/* Compile Pure Literals */
-int hs_compile_lit_multi(
-    const char * const *expressions,
-    const unsigned *flags,
-    const unsigned *ids,
-    const size_t *lens,
-    unsigned elements,
-    unsigned mode,
-    const hs_platform_info_t *platform,
-    hs_database_t **db,
-    hs_compile_error_t **error);
-
 /*------------------------ Scan Functions  ---------------------*/
 /* Block Scan */
 int hs_scan(
@@ -152,13 +137,6 @@ int hs_scan_vector(
     hs_scratch_t *scratch,
     match_event_handler onEvent,
     void *context);
-
-/* Stream Scan */
-int hs_open_stream(const hs_database_t *db, unsigned int flags, hs_stream_t **stream);
-int hs_scan_stream(hs_stream_t *id, const char *data, unsigned int length, unsigned int flags, hs_scratch_t *scratch, match_event_handler onEvent, void *ctxt);
-int hs_close_stream(hs_stream_t *id, hs_scratch_t *scratch, match_event_handler onEvent, void *ctxt);
-int hs_reset_stream(hs_stream_t *id, unsigned int flags, hs_scratch_t *scratch, match_event_handler onEvent, void *context);
-int hs_copy_stream(hs_stream_t **to_id, const hs_stream_t *from_id);
 
 /*--------------- Database Serialization ----------------*/
 int hs_serialized_database_info(const char *bytes, size_t length, char **info);
