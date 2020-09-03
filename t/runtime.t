@@ -4,9 +4,9 @@ use Test::Nginx::Socket::Lua;
 
 #no_shuffle();
 
-#repeat_each(2);
+repeat_each(2);
 
-#plan tests => blocks() * repeat_each() * 2;
+plan tests => blocks() * repeat_each() * 2;
 
 run_tests();
 
@@ -41,7 +41,7 @@ location = /t {
     content_by_lua_block {
         local hs = require('hyperscan')
         local obj = hs.get("test2_obj")
-        local ret, id = obj:scan("abcdefghisghk")
+        local ret, id = obj:scan("abcdefg11111111hisghk")
         if ret then
             return ngx.print("matchid:", id)
         else

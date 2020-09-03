@@ -289,9 +289,11 @@ end
 --]]
 function _M.init(mode)
     -- check hyperscan shared library
-    local so_name = _get_so_name('hs', _M._HS_VER)
+    local so_name
     if mode == _M.HS_WORK_RUNTIME then
         so_name = _get_so_name('hs_runtime', _M._HS_VER)
+    else
+        so_name = _get_so_name('hs', _M._HS_VER)
     end
 
     local so_path = _find_shared_obj(so_name)
@@ -536,7 +538,7 @@ function _M.set(name, object)
     end
 
     obj_store[name] = object
-
+    return true
 end
 
 function _M.get(name)
