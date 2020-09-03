@@ -36,3 +36,7 @@ luac.out
 
 # MacOS
 .DS_Store
+
+# Test::Nginx
+servroot
+
