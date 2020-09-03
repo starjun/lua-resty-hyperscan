@@ -36,7 +36,7 @@ luac.out
 
 # MacOS
 .DS_Store
-
+*.dSYM
 # Test::Nginx
 servroot
 
