@@ -12,7 +12,6 @@ Table of Contents
 - [Description](#description)
 - [Synopsis](#synopsis)
 - [Methods](#methods)
-  - [load library](#load-library)
   - [init](#init)
   - [new](#new)
   - [instance:compile](#compile)
@@ -167,7 +166,7 @@ compile
 -------------
 
 ```lua
-local ok, err = instance.compile(parameter)
+local ok, err = instance:compile(parameter)
 ```
 
 make or load the pattern database.
@@ -222,6 +221,57 @@ boolean value. true for success, false for failure and check ther `err`.
 #### `err`
 
 boolean value.
+
+[Back to TOC](#table-of-contents)
+
+
+
+## scan
+
+```lua
+local ok, ret = instance:scan(data)
+```
+
+scan data.
+
+### Parameters
+
+#### `mode`
+
+- hs.`HS_WORK_NORMAL` [Compiling Patterns](http://intel.github.io/hyperscan/dev-reference/compilation.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
+- hs.`HS_WORK_RUNTIME` [Serialization](http://intel.github.io/hyperscan/dev-reference/serialization.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
+
+### Return Value
+
+#### `ok`
+
+boolean value. true for match success and `ret`  is the pattern id, false for not match.
+
+#### `ret`
+
+pattern id.
+
+
+
+## free
+
+```lua
+local ok, err = instance:free()
+```
+
+destroy the instance.
+
+### Return Value
+
+#### `ok`
+
+boolean value. true for success, false for failure and check ther `err`.
+
+#### `err`
+
+string value to indicate error.
+
+
 
 [Back to TOC](#table-of-contents)
 

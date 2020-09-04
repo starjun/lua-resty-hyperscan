@@ -40,3 +40,4 @@ luac.out
 # Test::Nginx
 servroot
 
+.vscode
