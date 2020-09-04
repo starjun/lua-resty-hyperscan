@@ -272,12 +272,10 @@ local function _load_serialize_database(self, path)
     end
 
     -- alloc scratch space
-    if self.scan_mode ~= _M.HS_MODE_STREAM then
-        ret = hyperscan.hs_alloc_scratch(self.hs_database[0], self.hs_scratch)
-        if ret ~= hyperscan.HS_SUCCESS then
-            hyperscan.hs_free_database(self.hs_database[0])
-            return false, "alloc scratch failed, ret = " .. ret
-        end
+    ret = hyperscan.hs_alloc_scratch(self.hs_database[0], self.hs_scratch)
+    if ret ~= hyperscan.HS_SUCCESS then
+        hyperscan.hs_free_database(self.hs_database[0])
+        return false, "alloc scratch failed, ret = " .. ret
     end
 
     return true
@@ -377,13 +375,11 @@ local function _hs_compile_internal(self, patterns)
     -- output the compiled database info, something like 'Version: 5.3.0 Features: AVX2 Mode: BLOCK'
     --ngx.log(ngx.ERR, "=== [Hyperscan datebase info]: ", ffi.string(info[0]))
 
-    if mode ~= _M.HS_MODE_STREAM then
-        -- alloc scratch space
-        ret = hyperscan.hs_alloc_scratch(self.hs_database[0], self.hs_scratch)
-        if ret ~= hyperscan.HS_SUCCESS then
-            hyperscan.hs_free_database(self.hs_database[0])
-            return false, "alloc scratch failed, ret = " .. ret
-        end
+     -- alloc scratch space
+    ret = hyperscan.hs_alloc_scratch(self.hs_database[0], self.hs_scratch)
+    if ret ~= hyperscan.HS_SUCCESS then
+        hyperscan.hs_free_database(self.hs_database[0])
+        return false, "alloc scratch failed, ret = " .. ret
     end
 
     return true
@@ -520,12 +516,10 @@ function _M.clone(old)
     new.hs_result = ffi_new('hs_match_result_t[1]')
 
     -- new scratch space
-    if old.scan_mode ~= _M.HS_MODE_STREAM then
-        new.hs_scratch = ffi_new('hs_scratch_t*[1]')
-        local ret = hyperscan.hs_clone_scratch(old.hs_scratch[0], new.hs_scratch)
-        if ret ~= hyperscan.HS_SUCCESS then -- insufficient memory or invalid parameters
-            return nil
-        end
+    new.hs_scratch = ffi_new('hs_scratch_t*[1]')
+    local ret = hyperscan.hs_clone_scratch(old.hs_scratch[0], new.hs_scratch)
+    if ret ~= hyperscan.HS_SUCCESS then -- insufficient memory or invalid parameters
+        return nil
     end
 
     return new
