@@ -51,44 +51,88 @@ You should build the hyperscan shared library. I got some pre-build blow:
 Synopsis
 ========
 
+## normal mode
+
 ```lua
 init_by_lua_block {
     local hs = require('hyperscan')
-
-    -- load the shared libary and check the CPU
-    local ret, err = hs.init(hs.HS_WORK_MODE_NORMAL)
+    local ret, err = hs.init(hs.HS_WORK_NORMAL)
     if not ret then
-        return ngx.log(ngx.ERR, "hyperscan init failed, ", err)
+        ngx.log(ngx.ERR, "hyperscan init failed, ", err)
     end
 
-    -- a set of patterns, should load from file or Redis
+    local obj = hs.new(hs.HS_MODE_BLOCK)
+
     local patterns = {
-        {id = 1001, pattern = "\\d3",       flag = hs.HS_FLAG_CASELESS},
-        {id = 1002, pattern = "\\s{3,5}",   flag = 0},
-        {id = 1003, pattern = "[a-d]{2,7}", flag = 0}
+        {id = 1001, pattern = "\\d3",       flag = "iu"},
+        {id = 1002, pattern = "\\s{3,5}",   flag = "u"},
+        {id = 1003, pattern = "[a-d]{2,7}", flag = ""}
     }
 
     -- compile patterns to a database
-    ret, err = hs.hs_block_compile(patterns)
+    ret, err = obj:compile(patterns)
     if not ret then
-        return ngx.log(ngx.ERR, "hyperscan block compile failed, ", err)
+        ngx.log(ngx.ERR, "hyperscan block compile failed, ", err)
+        return
     end
+
+    hs.set("test1_obj", obj)
 }
 
 
-location / {
-    default_type text/plain;
+location = / {
     content_by_lua_block {
         local hs = require('hyperscan')
-        local mret, id, from, to = hs.hs_block_scan('0000000ABCD000000000abcd1122')
-        if mret then
-            return ngx.say("match:", id, "  ", from, "-", to)
+        local obj = hs.get("test1_obj")
+        local ret, id = obj:scan("abcdefghisghk")
+        if ret then
+            return ngx.print("matchid:", id)
+        else
+            return ngx.print("not match")
         end
+    }
+}
 
-        return ngx.say("not match")
+```
+
+## Runtime Mode
+
+```lua
+init_by_lua_block {
+    local hs = require('hyperscan')
+    local ret, err = hs.init(hs.HS_WORK_RUNTIME)
+    if not ret then
+        ngx.log(ngx.ERR, "hyperscan init failed, ", err)
+    end
+
+    local obj = hs.new(hs.HS_MODE_BLOCK)
+
+
+    -- load database
+    ret, err = obj:compile("test/make_serialize_database/serialized.db")
+    if not ret then
+        ngx.log(ngx.ERR, "hyperscan load database failed, ", err)
+        return
+    end
+
+    hs.set("test2_obj", obj)
+}
+
+location = / {
+    content_by_lua_block {
+        local hs = require('hyperscan')
+        local obj = hs.get("test2_obj")
+        local ret, id = obj:scan("abcdefg11111111hisghk")
+        if ret then
+            return ngx.print("matchid:", id)
+        else
+            ngx.print("not match")
+        end
     }
 }
 ```
+
+
 
 [Back to TOC](#table-of-contents)
 
@@ -270,6 +314,58 @@ boolean value. true for success, false for failure and check ther `err`.
 #### `err`
 
 string value to indicate error.
+
+
+
+## set
+
+```lua
+local ok, err = hs.set(instance)
+```
+
+store instance.
+
+### Return Value
+
+#### `ok`
+
+boolean value. true for success, false for failure and check ther `err`.
+
+#### `err`
+
+string value to indicate error.
+
+
+
+## get
+
+```lua
+local instance = hs.get()
+```
+
+get instance.
+
+### Return Value
+
+#### `instance`
+
+nil for failure.
+
+
+
+## clone
+
+```lua
+local new_instance = hs.clone(old_instance)
+```
+
+clone a instance, this is for muti-threads. then 2 threads can scan the same database at  the same time.
+
+### Return Value
+
+#### `new_instance`
+
+clone one
 
 
 
