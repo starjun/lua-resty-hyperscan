@@ -17,8 +17,8 @@ const unsigned int ids[] = {
 };
 
 typedef struct _str {
-	const char* data;
-	size_t      len;
+	char*  data;
+	size_t len;
 }str_t;
 
 #define strelm(a) {a, sizeof(a)-1}
@@ -50,7 +50,7 @@ int main(void)
     hs_scratch_t *scratch = NULL;
 	unsigned int* length;
 	unsigned int count;
-	char** data;
+	const char** data;
 	
 	ret = hs_compile_ext_multi(pattern, NULL, ids, NULL, elements, 
     					HS_MODE_VECTORED, NULL, &db, &compile_err);
@@ -73,7 +73,7 @@ int main(void)
 		data[i] = inputdata[i].data;
 		length[i] = inputdata[i].len;
 	}
-	ret = hs_scan_vector(db, const char *const *data, const length, count, 0, scratch, eventHandler, NULL);
+	ret = hs_scan_vector(db, data, length, count, 0, scratch, eventHandler, NULL);
 	if (ret != HS_SUCCESS && ret != HS_SCAN_TERMINATED) {
 		fprintf(stderr, "ERROR: Unable to scan input buffer. Exiting.\n");
 		hs_free_scratch(scratch);
