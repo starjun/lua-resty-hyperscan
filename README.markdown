@@ -14,8 +14,13 @@ Table of Contents
 - [Methods](#methods)
   - [load library](#load-library)
   - [init](#init)
-  - [hs_block_compile](#hs_block_compile)
-  - [hs_block_scan](#hs_block_scan)
+  - [new](#new)
+  - [instance:compile](#compile)
+  - [instance:scan](#scan)
+  - [instance:free](#free)
+  - [clone](#clone)
+  - [set](#set)
+  - [get](#get)
 - [Author](#author)
 - [Copyright and License](#copyright-and-license)
 - [See Also](#see-also)
@@ -30,8 +35,6 @@ Description
 
 **THIS LIBRARY ONLY SUPPORT [BLOCK SCAN](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_MODE_BLOCK) NOW !**
 
-**THIS LIBRARY IS NOT THREAD-SAFE !**
-
 **THIS LIBRARY IS ONLY TESTED on CentOS 7 !**
 
 # Dependency
@@ -44,7 +47,7 @@ You should build the hyperscan shared library. I got some pre-build blow:
 
 - [MacOS](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/osx)
 
-- [Windows 10](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/win10_x64)
+- [~~Windows 10~~](https://github.com/LubinLew/lua-resty-hyperscan/tree/master/hslibs/win10_x64)
 
 Synopsis
 ========
@@ -103,7 +106,7 @@ init
 ----
 
 ```lua
-local ok, err = hs.init(mode [,serialized_db_path])
+local ok, err = hs.init(mode)
 ```
 
 Load Hyperscan shared library and check the CPU Instruction Set.
@@ -112,12 +115,8 @@ Load Hyperscan shared library and check the CPU Instruction Set.
 
 #### `mode`
 
-- hs.`HS_WORK_MODE_NORMAL`    [Compiling Patterns](http://intel.github.io/hyperscan/dev-reference/compilation.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
-- hs.`HS_WORK_MODE_RUNTIME`  [Serialization](http://intel.github.io/hyperscan/dev-reference/serialization.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
-
-#### `serialized_db_path`
-
-if parameter `mode`  is hs.`HS_WORK_MODE_RUNTIME`, then this parameter is necessary.
+- hs.`HS_WORK_NORMAL`    [Compiling Patterns](http://intel.github.io/hyperscan/dev-reference/compilation.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
+- hs.`HS_WORK_RUNTIME`  [Serialization](http://intel.github.io/hyperscan/dev-reference/serialization.html) and [Scanning for Patterns](http://intel.github.io/hyperscan/dev-reference/runtime.html)
 
 ### Return Value
 
@@ -131,20 +130,88 @@ string value to indicate error.
 
 [Back to TOC](#table-of-contents)
 
-hs_block_compile
+new
 ----------------
 
 ```lua
-local ret, err = hs.hs_block_compile(patterns)
+local instance, err = hs.new(scan_mode)
 ```
 
-Compile patterns to a datebase for block mode scanning.
+Create a Hyperscan Instance.
 
 ### Parameters
 
-#### `patterns`
+#### `scan_mode`
 
-regex table.
+- hs.`HS_MODE_BLOCK`          Block mode: the target data is a discrete, contiguous block which can be scanned in one call and does not require state to be retained.
+
+- hs.`HS_MODE_STREAM`        Streaming mode: the target data to be scanned is a continuous stream, not all of which is available at once; blocks of data are scanned in sequence and matches may span multiple blocks in a stream. In streaming mode, each stream requires a block of memory to store its state between scan calls.
+
+- hs.`HS_MODE_VECTORED`    Vectored mode: the target data consists of a list of non-contiguous blocks that are available all at once. As for block mode, no retention of state is required.
+
+> [Compiling Patterns &#8212; Hyperscan 5.3.0 documentation](http://intel.github.io/hyperscan/dev-reference/compilation.html#compilation)
+
+### Return Value
+
+#### `instance`
+
+Hyperscan Instance.  nil for failure and check ther `err`.
+
+#### `err`
+
+string value to indicate error.
+
+[Back to TOC](#table-of-contents)
+
+compile
+-------------
+
+```lua
+local ok, err = instance.compile(parameter)
+```
+
+make or load the pattern database.
+
+### Parameters
+
+#### `parameter`
+
+| init mode            | scan mode             | parameter             |
+| -------------------- | --------------------- | --------------------- |
+| hs.`HS_WORK_NORMAL`  | hs.`HS_MODE_BLOCK`    | table(pattern list)   |
+|                      | hs.`HS_MODE_STREAM`   | table(pattern list)   |
+|                      | hs.`HS_MODE_VECTORED` | table(pattern list)   |
+| hs.`HS_WORK_RUNTIME` | hs.`HS_MODE_BLOCK`    | string(database path) |
+|                      | hs.`HS_MODE_STREAM`   | string(database path) |
+|                      | hs.`HS_MODE_VECTORED` | string(database path) |
+
+#### Pattern List
+
+##### Example
+
+```lua
+local patterns = {
+    {id = 1001, pattern = "\\d3",       flag = "iu"   },
+    {id = 1002, pattern = "\\s{3,5}",   flag = "dmsu" },
+    {id = 1003, pattern = "[a-d]{2,7}", flag = ""     }
+}
+```
+
+##### Flags
+
+| Flag  | Hyperscan Value                                                                                              | Remark                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| `'i'` | [HS_FLAG_CASELESS](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_CASELESS)         | Set case-insensitive matching                           |
+| `'d'` | [HS_FLAG_DOTALL](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_DOTALL)             | Matching a `.` will not exclude newlines.               |
+| `'m'` | [HS_FLAG_MULTILINE](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_MULTILINE)       | Set multi-line anchoring.                               |
+| `'s'` | [HS_FLAG_SINGLEMATCH](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_SINGLEMATCH)   | Set single-match only mode.                             |
+| `'e'` | [HS_FLAG_ALLOWEMPTY](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_ALLOWEMPTY)     | Allow expressions that can match against empty buffers. |
+| `'u'` | [HS_FLAG_UTF8](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_UTF8)                 | Enable UTF-8 mode for this expression.                  |
+| `'p'` | [HS_FLAG_UCP](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_UCP)                   | Enable Unicode property support for this expression.    |
+| `'f'` | [HS_FLAG_PREFILTER](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_PREFILTER)       | Enable prefiltering mode for this expression.           |
+| `'l'` | [HS_FLAG_SOM_LEFTMOST](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_SOM_LEFTMOST) | Enable leftmost start of match reporting.               |
+| `'c'` | [HS_FLAG_COMBINATION](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_COMBINATION)   | Logical combination.                                    |
+| `'q'` | [HS_FLAG_QUIET](http://intel.github.io/hyperscan/dev-reference/api_files.html#c.HS_FLAG_QUIET)               | Don't do any match reporting.                           |
 
 ### Return Value
 
@@ -154,38 +221,7 @@ boolean value. true for success, false for failure and check ther `err`.
 
 #### `err`
 
-string value to indicate error.
-
-[Back to TOC](#table-of-contents)
-
-hs_block_scan
--------------
-
-```lua
-local ret, id, from, to = hs.hs_block_scan(string)
-```
-
-scan the input data and return the match result
-
-### Parameters
-
-#### `string`
-
-a string.
-
-### Return Value
-
-#### `ret`
-
 boolean value.
-
-#### `id`
-
-matched id.
-
-#### `from` , `to`
-
-matched postion.
 
 [Back to TOC](#table-of-contents)
 
